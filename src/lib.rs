@@ -4,6 +4,8 @@ pub mod cmd;
 
 mod error;
 
+mod common;
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum PackageCategories {
     StaticLib,
