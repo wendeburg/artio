@@ -39,6 +39,8 @@ pub fn init_package(path: &str, name: Option<String>, category: PackageCategorie
             VCSOptions::None => (),
             VCSOptions::Git => manage_git_repo_initialization(package_dir_path),
         }
+
+        println!("Created {} '{}' package", category.get_string(), &package_name);
     }
     else {
         handle_error_finish_execution::<()>(anyhow!("destination '{}' does not exist\n\nUse 'artio new' to initialize a new directory", path));
