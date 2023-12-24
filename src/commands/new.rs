@@ -2,7 +2,7 @@ use std::path::{Path};
 use anyhow::{anyhow};
 use crate::error::handle_error_finish_execution;
 use crate::{PackageCategories, VCSOptions};
-use crate::cmd::init::init_package;
+use crate::commands::init::init_package;
 use crate::common::file_system_utils::*;
 
 pub fn new_package(path: &str, name: Option<String>, category: PackageCategories, vcs: VCSOptions) {

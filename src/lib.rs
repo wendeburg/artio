@@ -1,6 +1,6 @@
 use clap::ValueEnum;
 
-pub mod cmd;
+pub mod commands;
 
 mod error;
 

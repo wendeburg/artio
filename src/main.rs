@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use artio::{cmd::new::new_package, PackageCategories, VCSOptions};
+use artio::{commands::new::new_package, PackageCategories, VCSOptions};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
