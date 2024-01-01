@@ -1,7 +1,6 @@
 use clap::ValueEnum;
 use semver::Version;
-use serde::{Deserialize, Serialize, Serializer};
-use serde::ser::Serialize as SerializeTrait;
+use serde::{Deserialize, Serialize};
 
 pub mod commands;
 
@@ -9,29 +8,23 @@ mod error;
 
 mod common;
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum PackageKinds {
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Serialize, Deserialize, Debug)]
+pub enum PackageKind {
+    #[serde(alias="static-lib")]
     StaticLib,
+    #[serde(alias="dynamic-lib")]
     DynamicLib,
+    #[serde(alias="application")]
     Application
 }
 
-impl PackageKinds {
-    fn get_string(&self) -> String {
+impl PackageKind {
+    fn get_alias(&self) -> String {
         match self {
-            PackageKinds::StaticLib => "static-lib".to_string(),
-            PackageKinds::DynamicLib => "dynamic-lib".to_string(),
-            PackageKinds::Application => "application".to_string()
+            PackageKind::StaticLib => "static-lib".to_string(),
+            PackageKind::DynamicLib => "dynamic-lib".to_string(),
+            PackageKind::Application => "application".to_string()
         }
-    }
-}
-
-impl SerializeTrait for PackageKinds {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-    {
-        serializer.serialize_str(&self.get_string())
     }
 }
 
@@ -41,14 +34,9 @@ pub enum VCSOptions {
     None
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct ArtioPackage {
-    package: PackageProperties
-}
-
-#[derive(Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct PackageProperties {
     pub name: String,
-    pub kind: PackageKinds,
+    pub kind: PackageKind,
     pub version: Version,
 }

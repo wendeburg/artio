@@ -1,11 +1,11 @@
 use std::path::Path;
 use anyhow::anyhow;
 use semver::{BuildMetadata, Prerelease, Version};
-use crate::{PackageKinds, PackageProperties, VCSOptions};
+use crate::{PackageKind, PackageProperties, VCSOptions};
 use crate::common::file_system_utils::*;
 use crate::error::handle_error_finish_execution;
 
-pub fn init_package(path: &str, name: Option<String>, category: PackageKinds, vcs: VCSOptions) {
+pub fn init_package(path: &str, name: Option<String>, category: PackageKind, vcs: VCSOptions) {
     let package_dir_path = Path::new(path);
     let package_dir_exists = check_exists(package_dir_path);
 
@@ -39,8 +39,8 @@ pub fn init_package(path: &str, name: Option<String>, category: PackageKinds, vc
         write_all_to_file(&mut artio_package_toml, toml::to_string(&package_properties).unwrap().as_bytes(), (*artio_package_toml_path.to_string_lossy()).to_owned());
 
         match category {
-            PackageKinds::Application => generate_application_structure(package_dir_path, &package_name),
-            PackageKinds::DynamicLib | PackageKinds::StaticLib => generate_library_structure(package_dir_path, &package_name),
+            PackageKind::Application => generate_application_structure(package_dir_path, &package_name),
+            PackageKind::DynamicLib | PackageKind::StaticLib => generate_library_structure(package_dir_path, &package_name),
         }
 
         match vcs  {
@@ -48,7 +48,7 @@ pub fn init_package(path: &str, name: Option<String>, category: PackageKinds, vc
             VCSOptions::Git => manage_git_repo_initialization(package_dir_path),
         }
 
-        println!("Created {} '{}' package", category.get_string(), &package_name);
+        println!("Created {} '{}' package", category.get_alias(), &package_name);
     }
     else {
         handle_error_finish_execution::<()>(anyhow!("destination '{}' does not exist\n\nUse 'artio new' to initialize a new directory", path));
@@ -105,4 +105,83 @@ fn get_library_cpp_file_contents() -> String {
 
 fn get_library_h_file_contents() -> String {
     "int add(int, int);".to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::fs::DirBuilder;
+    use semver::{BuildMetadata, Prerelease, Version};
+    use crate::commands::init::init_package;
+    use crate::{PackageKind, PackageProperties, VCSOptions};
+
+    #[test]
+    fn create_application_directory_structure() -> Result<(), Box<dyn std::error::Error>> {
+        let tempdir = tempfile::tempdir()?;
+
+        let new_package_path = tempdir.path().join("testapp");
+
+        let _ = DirBuilder::new().recursive(false).create(&new_package_path);
+
+        init_package((*new_package_path.to_string_lossy()).as_ref(), None, PackageKind::Application, VCSOptions::None);
+
+        let cpp_file_path = new_package_path.join("src/testapp.cpp");
+        let cpp_file_contents = fs::read_to_string(cpp_file_path)?;
+        assert_eq!(cpp_file_contents, "int main() {\n  return 0;\n}".to_string());
+
+        let artio_package_toml = new_package_path.join("artio_package.toml");
+        let package_properties_actual: PackageProperties = toml::from_str(fs::read_to_string(artio_package_toml)?.as_str())?;
+        let package_properties_expected = PackageProperties {
+            name: "testapp".to_owned(),
+            kind: PackageKind::Application,
+            version: Version {
+                major: 0,
+                minor: 1,
+                patch: 0,
+                pre: Prerelease::EMPTY,
+                build: BuildMetadata::EMPTY
+            }
+        };
+
+        assert_eq!(package_properties_actual, package_properties_expected);
+
+        tempdir.close()?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn create_application_directory_structure_with_name() -> Result<(), Box<dyn std::error::Error>> {
+        let tempdir = tempfile::tempdir()?;
+
+        let new_package_path = tempdir.path().join("testapp");
+
+        let _ = DirBuilder::new().recursive(false).create(&new_package_path);
+
+        init_package((*new_package_path.to_string_lossy()).as_ref(), Some("aname".to_owned()), PackageKind::Application, VCSOptions::None);
+
+        let cpp_file_path = new_package_path.join("src/aname.cpp");
+        let cpp_file_contents = fs::read_to_string(cpp_file_path)?;
+        assert_eq!(cpp_file_contents, "int main() {\n  return 0;\n}".to_string());
+
+        let artio_package_toml = new_package_path.join("artio_package.toml");
+        let package_properties_actual: PackageProperties = toml::from_str(fs::read_to_string(artio_package_toml)?.as_str())?;
+        let package_properties_expected = PackageProperties {
+            name: "aname".to_owned(),
+            kind: PackageKind::Application,
+            version: Version {
+                major: 0,
+                minor: 1,
+                patch: 0,
+                pre: Prerelease::EMPTY,
+                build: BuildMetadata::EMPTY
+            }
+        };
+
+        assert_eq!(package_properties_actual, package_properties_expected);
+
+        tempdir.close()?;
+
+        Ok(())
+    }
 }
