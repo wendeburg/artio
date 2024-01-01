@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use artio::{commands::new::new_package, PackageCategories, VCSOptions};
+use artio::{commands::new::new_package, PackageKinds, VCSOptions};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -25,7 +25,7 @@ struct NewPackageArguments {
     name: Option<String>,
 
     #[arg(short, long, name="category", value_enum, default_value_t=PackageCategories::Application, help="Set the package category.")]
-    category: PackageCategories,
+    category: PackageKinds,
 
     #[arg(long, name="vcs", value_enum, default_value_t=VCSOptions::Git, help="Set the vcs to initialize")]
     vcs: VCSOptions

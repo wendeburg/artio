@@ -1,4 +1,7 @@
 use clap::ValueEnum;
+use semver::Version;
+use serde::{Deserialize, Serialize, Serializer};
+use serde::ser::Serialize as SerializeTrait;
 
 pub mod commands;
 
@@ -7,19 +10,28 @@ mod error;
 mod common;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-pub enum PackageCategories {
+pub enum PackageKinds {
     StaticLib,
     DynamicLib,
     Application
 }
 
-impl PackageCategories {
+impl PackageKinds {
     fn get_string(&self) -> String {
         match self {
-            PackageCategories::StaticLib => "static-lib".to_string(),
-            PackageCategories::DynamicLib => "dynamic-lib".to_string(),
-            PackageCategories::Application => "application".to_string()
+            PackageKinds::StaticLib => "static-lib".to_string(),
+            PackageKinds::DynamicLib => "dynamic-lib".to_string(),
+            PackageKinds::Application => "application".to_string()
         }
+    }
+}
+
+impl SerializeTrait for PackageKinds {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+    {
+        serializer.serialize_str(&self.get_string())
     }
 }
 
@@ -29,30 +41,14 @@ pub enum VCSOptions {
     None
 }
 
-pub struct PackageProperties {
-    pub name: String,
-    pub category: String,
-    pub version: String,
+#[derive(Serialize, Deserialize)]
+pub struct ArtioPackage {
+    package: PackageProperties
 }
 
-impl PackageProperties {
-    fn new() -> PackageProperties {
-        PackageProperties {
-            name: "".to_string(),
-            category: "".to_string(),
-            version: "".to_string(),
-        }
-    }
-
-    fn as_toml(&self) -> String {
-        let mut file_contents = "[package]\nname = \"".to_string();
-        file_contents.push_str(self.name.as_str());
-        file_contents.push_str("\"\nversion = ");
-        file_contents.push_str(self.version.as_str());
-        file_contents.push_str("\ncategory = \"");
-        file_contents.push_str(self.category.as_str());
-        file_contents.push_str("\"");
-
-        file_contents
-    }
+#[derive(Serialize, Deserialize)]
+pub struct PackageProperties {
+    pub name: String,
+    pub kind: PackageKinds,
+    pub version: Version,
 }
