@@ -24,7 +24,7 @@ struct NewPackageArguments {
     #[arg(short, long, name="name", help="Set the package name. Defaults to directory name")]
     name: Option<String>,
 
-    #[arg(short, long, name="category", value_enum, default_value_t=PackageCategories::Application, help="Set the package category.")]
+    #[arg(short, long, name="category", value_enum, default_value_t=PackageKind::Application, help="Set the package category.")]
     category: PackageKind,
 
     #[arg(long, name="vcs", value_enum, default_value_t=VCSOptions::Git, help="Set the vcs to initialize")]
