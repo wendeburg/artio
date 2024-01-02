@@ -1,5 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use artio::{commands::new::new_package, PackageKind, VCSOptions};
+use artio::commands::init::init_package;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -36,7 +37,7 @@ fn main() {
 
     match args.command {
         Some(Commands::New ( args)) => new_package(&args.path, args.name, args.category, args.vcs),
-        Some(Commands::Init(_)) => todo!(),
+        Some(Commands::Init(args)) => init_package(&args.path, args.name, args.category, args.vcs),
         None => todo!(),
     }
 }

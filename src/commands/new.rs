@@ -18,3 +18,20 @@ pub fn new_package(path: &str, name: Option<String>, category: PackageKind, vcs:
         handle_error_finish_execution::<()>(anyhow!("destination '{}' already exists\n\nUse 'artio init' to initialize the directory", package_dir_path.to_string_lossy()));
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::fs::DirBuilder;
+    use crate::{PackageKind, VCSOptions};
+    use crate::commands::new::new_package;
+
+    #[test]
+    #[should_panic]
+    fn init_non_existant_dir() {
+        let tempdir = tempfile::tempdir().unwrap();
+        let new_package_path = tempdir.path().join("testapp");
+        let _ = DirBuilder::new().recursive(false).create(&new_package_path).unwrap();
+
+        new_package((*new_package_path.to_string_lossy()).as_ref(), None, PackageKind::Application, VCSOptions::None);
+    }
+}
