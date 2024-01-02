@@ -116,7 +116,7 @@ mod tests {
     use crate::{PackageKind, PackageProperties, VCSOptions};
 
     #[test]
-    fn create_application_directory_structure() -> Result<(), Box<dyn std::error::Error>> {
+    fn init_application() -> Result<(), Box<dyn std::error::Error>> {
         let tempdir = tempfile::tempdir()?;
 
         let new_package_path = tempdir.path().join("testapp");
@@ -127,7 +127,7 @@ mod tests {
 
         let cpp_file_path = new_package_path.join("src/testapp.cpp");
         let cpp_file_contents = fs::read_to_string(cpp_file_path)?;
-        assert_eq!(cpp_file_contents, "int main() {\n  return 0;\n}".to_string());
+        assert_eq!(cpp_file_contents, super::get_application_cpp_file_contents());
 
         let artio_package_toml = new_package_path.join("artio_package.toml");
         let package_properties_actual: PackageProperties = toml::from_str(fs::read_to_string(artio_package_toml)?.as_str())?;
@@ -151,7 +151,7 @@ mod tests {
     }
 
     #[test]
-    fn create_application_directory_structure_with_name() -> Result<(), Box<dyn std::error::Error>> {
+    fn init_application_with_name() -> Result<(), Box<dyn std::error::Error>> {
         let tempdir = tempfile::tempdir()?;
 
         let new_package_path = tempdir.path().join("testapp");
@@ -162,7 +162,7 @@ mod tests {
 
         let cpp_file_path = new_package_path.join("src/aname.cpp");
         let cpp_file_contents = fs::read_to_string(cpp_file_path)?;
-        assert_eq!(cpp_file_contents, "int main() {\n  return 0;\n}".to_string());
+        assert_eq!(cpp_file_contents, super::get_application_cpp_file_contents());
 
         let artio_package_toml = new_package_path.join("artio_package.toml");
         let package_properties_actual: PackageProperties = toml::from_str(fs::read_to_string(artio_package_toml)?.as_str())?;
@@ -183,5 +183,92 @@ mod tests {
         tempdir.close()?;
 
         Ok(())
+    }
+
+    #[test]
+    fn init_dynamic_library() -> Result<(), Box<dyn std::error::Error>> {
+        let tempdir = tempfile::tempdir()?;
+
+        let new_package_path = tempdir.path().join("testdynlib");
+
+        let _ = DirBuilder::new().recursive(false).create(&new_package_path);
+
+        init_package((*new_package_path.to_string_lossy()).as_ref(), None, PackageKind::DynamicLib, VCSOptions::None);
+
+        let cpp_file_path = new_package_path.join("src/testdynlib.cpp");
+        let cpp_file_contents = fs::read_to_string(cpp_file_path)?;
+        assert_eq!(cpp_file_contents, super::get_library_cpp_file_contents());
+
+        let h_file_path = new_package_path.join("include/testdynlib/testdynlib.h");
+        let h_file_contents = fs::read_to_string(h_file_path)?;
+        assert_eq!(h_file_contents, super::get_library_h_file_contents());
+
+        let artio_package_toml = new_package_path.join("artio_package.toml");
+        let package_properties_actual: PackageProperties = toml::from_str(fs::read_to_string(artio_package_toml)?.as_str())?;
+        let package_properties_expected = PackageProperties {
+            name: "testdynlib".to_owned(),
+            kind: PackageKind::DynamicLib,
+            version: Version {
+                major: 0,
+                minor: 1,
+                patch: 0,
+                pre: Prerelease::EMPTY,
+                build: BuildMetadata::EMPTY
+            }
+        };
+
+        assert_eq!(package_properties_actual, package_properties_expected);
+
+        tempdir.close()?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn init_static_library() -> Result<(), Box<dyn std::error::Error>> {
+        let tempdir = tempfile::tempdir()?;
+
+        let new_package_path = tempdir.path().join("teststaticlib");
+
+        let _ = DirBuilder::new().recursive(false).create(&new_package_path);
+
+        init_package((*new_package_path.to_string_lossy()).as_ref(), None, PackageKind::StaticLib, VCSOptions::None);
+
+        let cpp_file_path = new_package_path.join("src/teststaticlib.cpp");
+        let cpp_file_contents = fs::read_to_string(cpp_file_path)?;
+        assert_eq!(cpp_file_contents, super::get_library_cpp_file_contents());
+
+        let h_file_path = new_package_path.join("include/teststaticlib/teststaticlib.h");
+        let h_file_contents = fs::read_to_string(h_file_path)?;
+        assert_eq!(h_file_contents, super::get_library_h_file_contents());
+
+        let artio_package_toml = new_package_path.join("artio_package.toml");
+        let package_properties_actual: PackageProperties = toml::from_str(fs::read_to_string(artio_package_toml)?.as_str())?;
+        let package_properties_expected = PackageProperties {
+            name: "teststaticlib".to_owned(),
+            kind: PackageKind::StaticLib,
+            version: Version {
+                major: 0,
+                minor: 1,
+                patch: 0,
+                pre: Prerelease::EMPTY,
+                build: BuildMetadata::EMPTY
+            }
+        };
+
+        assert_eq!(package_properties_actual, package_properties_expected);
+
+        tempdir.close()?;
+
+        Ok(())
+    }
+
+    #[test]
+    #[should_panic]
+    fn init_non_existant_dir() {
+        let tempdir = tempfile::tempdir().unwrap();
+        let new_package_path = tempdir.path().join("testapp");
+
+        init_package((*new_package_path.to_string_lossy()).as_ref(), None, PackageKind::Application, VCSOptions::None);
     }
 }
