@@ -43,9 +43,8 @@ pub fn init_package(path: &str, name: Option<String>, category: PackageKind, vcs
             PackageKind::DynamicLib | PackageKind::StaticLib => generate_library_structure(package_dir_path, &package_name),
         }
 
-        match vcs  {
-            VCSOptions::None => (),
-            VCSOptions::Git => manage_git_repo_initialization(package_dir_path),
+        if let Some(vcs_manager) = vcs.get_vcs_manager() {
+            vcs_manager.initialize_new_vcs_repo(package_dir_path);
         }
 
         println!("Created {} '{}' package", category.get_alias(), &package_name);
