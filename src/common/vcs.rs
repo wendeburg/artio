@@ -4,9 +4,6 @@ use crate::VCSManager;
 
 pub struct Git;
 
-impl Git {
-}
-
 impl VCSManager for Git {
     fn check_vcs_installed() -> bool {
         match Command::new("git").arg("--version").output() {
