@@ -1,5 +1,7 @@
 use std::path::Path;
 use std::process::Command;
+use anyhow::Context;
+use crate::error::handle_warning_print_to_stdout;
 use crate::VCSManager;
 
 pub struct Git;
@@ -21,9 +23,9 @@ impl VCSManager for Git {
 
     fn initialize_new_vcs_repo<P: AsRef<Path>>(path: P) {
         if !Self::check_vcs_repo_exists(&path) && Self::check_vcs_installed() {
-            match Command::new("git").arg("init").output() {
+            match Command::new("git").arg("init").output().context("Could not create repository") {
                 Ok(_) => (),
-                Err(_) => todo!()
+                Err(error) => handle_warning_print_to_stdout(error)
             }
         }
     }

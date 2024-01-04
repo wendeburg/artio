@@ -4,7 +4,7 @@ use anyhow::Error;
 pub fn handle_error_finish_execution<T>(error: Error) -> T {
     #[cfg(not(test))]
     {
-        println!("Error: {}", error);
+        eprintln!("Error: {}", error);
         process::exit(1);
     }
 
@@ -12,4 +12,8 @@ pub fn handle_error_finish_execution<T>(error: Error) -> T {
     {
         panic!("handled error");
     }
+}
+
+pub fn handle_warning_print_to_stdout(error: Error) {
+    println!("Warning: {}", error);
 }
