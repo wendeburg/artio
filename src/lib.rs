@@ -10,6 +10,8 @@ mod error;
 
 mod common_utils;
 
+mod config;
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Serialize, Deserialize, Debug)]
 pub enum PackageKind {
     #[serde(alias="static-lib")]
