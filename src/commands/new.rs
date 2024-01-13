@@ -3,7 +3,7 @@ use anyhow::{anyhow};
 use crate::error::handle_error_finish_execution;
 use crate::{PackageKind, VCSOptions};
 use crate::commands::init::init_package;
-use crate::common::file_system_utils::*;
+use crate::common_utils::file_system_utils::*;
 
 pub fn new_package(path: &str, name: Option<String>, category: PackageKind, vcs: VCSOptions) {
     let package_dir_path = Path::new(&path);

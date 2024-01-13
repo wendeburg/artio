@@ -2,13 +2,13 @@ use std::path::Path;
 use clap::ValueEnum;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use crate::common::vcs::Git;
+use crate::common_utils::vcs::Git;
 
 pub mod commands;
 
 mod error;
 
-mod common;
+mod common_utils;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Serialize, Deserialize, Debug)]
 pub enum PackageKind {

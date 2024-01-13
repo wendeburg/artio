@@ -2,7 +2,7 @@ use std::path::Path;
 use anyhow::anyhow;
 use semver::{BuildMetadata, Prerelease, Version};
 use crate::{PackageKind, PackageProperties, VCSOptions};
-use crate::common::file_system_utils::*;
+use crate::common_utils::file_system_utils::*;
 use crate::error::handle_error_finish_execution;
 
 pub fn init_package(path: &str, name: Option<String>, category: PackageKind, vcs: VCSOptions) {
